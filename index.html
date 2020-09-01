@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta content="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dungeon Generator</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <script src="math.js"></script>
+    <script src="geometry.js"></script>
+    <script src="probability.js"></script>
+    <script src="canvas-window.js"></script>
+    <script src="dungeon-generator.js"></script>
+    <script src="dat.gui.js"></script>
+    <script>
+        const canvas = new CanvasWindow();
+        
+        const settings = {
+            numberOfRooms: 32,
+            circleRadius: 8,
+            minRoomSize: 40,
+            maxRoomSize: 160,
+            gravitationalForce: 0.001,
+            velocityStepSize: 0.5,
+            maxVelocity: 16,
+            nearestNeighbours: 2,
+            regenerate: () => {  } /* used for dat.gui */
+        };
+
+        const generate = () => {
+
+            const dungeon = new DungeonGenerator(settings);
+            dungeon.generate();
+            const drawer = new DungeonDrawer(canvas);
+
+            const animate = () => {
+                canvas.clear();
+                if (!dungeon.step()) {
+                    requestAnimationFrame(animate);
+                }
+                else {
+                    dungeon.calculateNearestNeighbours();
+                }
+                drawer.draw(dungeon);
+            }
+
+            animate();
+        }
+
+        settings.regenerate = generate;
+        generate();
+
+        const gui = new dat.GUI();
+        gui.add(settings, 'numberOfRooms', 1, 400);
+        gui.add(settings, 'circleRadius', 1, 1024);
+        gui.add(settings, 'minRoomSize', 1, 200);
+        gui.add(settings, 'maxRoomSize', 1, 800);
+        gui.add(settings, 'gravitationalForce', 0.00001, 1);
+        gui.add(settings, 'velocityStepSize', 0.001, 1);
+        gui.add(settings, 'maxVelocity', 1, 100);
+        gui.add(settings, 'nearestNeighbours', 0, 16);
+        gui.add(settings, 'regenerate');
+
+    </script>
+</body>
+</html>
