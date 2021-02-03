@@ -34,6 +34,7 @@
             regenerate: () => {  } /* used for dat.gui */
         };
 
+        let cancel = false;
         const generate = () => {
 
             const dungeon = new DungeonGenerator(settings);
@@ -41,6 +42,11 @@
             const drawer = new DungeonDrawer(canvas);
 
             const animate = () => {
+                if(cancel)
+                {
+                    return;
+                }
+
                 canvas.clear();
                 if (!dungeon.step()) {
                     requestAnimationFrame(animate);
@@ -54,7 +60,14 @@
             animate();
         }
 
-        settings.regenerate = generate;
+        // Hacky way to cancel the drawing
+        settings.regenerate = () => {
+            cancel = true;
+            setTimeout(() => {
+                cancel = false;
+                generate();
+            }, 100)
+        };
         generate();
 
         const gui = new dat.GUI();
